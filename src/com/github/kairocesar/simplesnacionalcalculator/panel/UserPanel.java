@@ -65,9 +65,9 @@ public class UserPanel {
         System.out.print("Did your company sell products subject to ICMS ST(yes/no?)? ");
         if (inputSt.next().equalsIgnoreCase("yes")) {
           return "ICMS";
-        } else {
-            return null;
         }
+
+        return null;
     }
 
     private static String checkMonophasicPisAndCofins() {
@@ -75,8 +75,8 @@ public class UserPanel {
         System.out.print("Did your company sell products subject to monophasic taxation of Pis/Cofins (yes/no?)? ");
         if (inputMono.next().equalsIgnoreCase("yes")) {
             return "PIS COFINS";
-        } else {
-            return null;
         }
+
+        return null;
     }
 }

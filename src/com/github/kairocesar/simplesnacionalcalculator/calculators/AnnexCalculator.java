@@ -30,35 +30,36 @@ public class AnnexCalculator {
             taxes.put(tax.getKey(), taxValue);
         }
 
-
-        if(taxCalc.replacedTaxes().length > 0) {
-            String pis;
-            String cofins;
+        if (taxCalc.replacedTaxes().length > 0) {
             for (String tax : taxCalc.replacedTaxes()) {
-                if (tax.equalsIgnoreCase("PIS COFINS")) {
-                    // deu erro aqui, acredito que essas instruções devem ficar no método de baixo
-                    pis = tax.substring(0, tax.indexOf(" "));
-                    cofins = tax.substring(tax.indexOf(" ") + 1, tax.length());
-                    taxesWithReplace = calculateTaxWithReplace(UserPanel.getSalesValueWithReplace(pis), pis);
-                    taxesWithReplace = calculateTaxWithReplace(UserPanel.getSalesValueWithReplace(cofins), cofins);
-                }
                 taxesWithReplace = calculateTaxWithReplace(UserPanel.getSalesValueWithReplace(tax), tax);
+                //erro
                 taxesReturn.put(tax, taxes.get(tax) + taxesWithReplace.get(tax));
             }
         }
-
         return taxesReturn;
-
     }
 
     private Map<String, Double> calculateTaxWithReplace(double salesValue, String... taxName) {
+        String pis;
+        String cofins;
+
         for (Map.Entry<String, Double[]> tax : taxCalc.getTaxes().entrySet()) {
             taxesWithReplace.put(tax.getKey(), salesValue * (tax.getValue()[taxCalc.getRange()] *
                     taxCalc.getGeneralAliquot()));
         }
         for (String tax : taxName) {
-            taxesWithReplace.put(tax, 0d);
+            if (tax.equalsIgnoreCase("PIS COFINS")) {
+                pis = tax.substring(0, tax.indexOf(" "));
+                cofins = tax.substring(tax.indexOf(" ") + 1, tax.length());
+                taxesWithReplace.put(pis, 0d);
+                taxesWithReplace.put(cofins, 0d);
+            } else {
+                taxesWithReplace.put(tax, 0d);
+            }
         }
         return taxesWithReplace;
-    } 
+    }
+
 }
+
