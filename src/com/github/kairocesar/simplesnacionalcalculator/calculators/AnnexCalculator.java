@@ -1,22 +1,16 @@
 package com.github.kairocesar.simplesnacionalcalculator.calculators;
 
 import com.github.kairocesar.simplesnacionalcalculator.panel.UserPanel;
-
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class AnnexCalculator {
 
-    private final NumberFormat currencyFormat = NumberFormat.getCurrencyInstance();
-    private final NumberFormat percentFormat = new DecimalFormat("#.###%");
     private Map<String, Double> taxes = new LinkedHashMap<>();
-    private Map<String, Double> taxesWithReplace = new LinkedHashMap<>();
-    private Map<String, Double> taxesReturn = new LinkedHashMap<>();
-
-
+    private double valueWihReplacement;
     private TaxCalculator taxCalc;
+
 
     public AnnexCalculator(TaxCalculator taxCalc) {
         this.taxCalc = taxCalc;
@@ -29,36 +23,28 @@ public class AnnexCalculator {
             double taxValue = taxCalc.salesValue() * aliquotTax;
             taxes.put(tax.getKey(), taxValue);
         }
-
-        if (taxCalc.replacedTaxes().length > 0) {
-            for (String tax : taxCalc.replacedTaxes()) {
-                taxesWithReplace = calculateTaxWithReplace(UserPanel.getSalesValueWithReplace(tax), tax);
-                //erro
-                taxesReturn.put(tax, taxes.get(tax) + taxesWithReplace.get(tax));
-            }
-        }
-        return taxesReturn;
+        calculateTaxWithReplacement();
+        return taxes;
     }
 
-    private Map<String, Double> calculateTaxWithReplace(double salesValue, String... taxName) {
-        String pis;
-        String cofins;
-
-        for (Map.Entry<String, Double[]> tax : taxCalc.getTaxes().entrySet()) {
-            taxesWithReplace.put(tax.getKey(), salesValue * (tax.getValue()[taxCalc.getRange()] *
-                    taxCalc.getGeneralAliquot()));
-        }
-        for (String tax : taxName) {
-            if (tax.equalsIgnoreCase("PIS COFINS")) {
-                pis = tax.substring(0, tax.indexOf(" "));
-                cofins = tax.substring(tax.indexOf(" ") + 1, tax.length());
-                taxesWithReplace.put(pis, 0d);
-                taxesWithReplace.put(cofins, 0d);
-            } else {
-                taxesWithReplace.put(tax, 0d);
+    private void calculateTaxWithReplacement() {
+        for (String tax : taxCalc.replacedTaxes()) {
+            if (!Objects.isNull(tax) && tax.equalsIgnoreCase("PIS COFINS")) {
+                valueWihReplacement = UserPanel.checkReplacementTaxation(tax);
+                removeValueOfTax(valueWihReplacement, "PIS");
+                removeValueOfTax(valueWihReplacement, "COFINS");
+            } else if (!Objects.isNull(tax)) {
+                valueWihReplacement = UserPanel.checkReplacementTaxation(tax);
+                removeValueOfTax(valueWihReplacement, tax);
             }
         }
-        return taxesWithReplace;
+    }
+
+    private void removeValueOfTax(double salesValue, String tax) {
+        double aliquotTax = taxCalc.getGeneralAliquot() * taxCalc.getTaxes().get(tax)[taxCalc.getRange()];
+        double valueTaxToPay = taxes.get(tax);
+        double valueTaxToPut = valueTaxToPay - (salesValue * aliquotTax);
+        taxes.put(tax, valueTaxToPut);
     }
 
 }
