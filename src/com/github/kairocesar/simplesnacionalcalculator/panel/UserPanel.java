@@ -10,12 +10,13 @@ public class UserPanel {
 
     private static final AbstractAnnex[] annexes = {new AnnexOne(), new AnnexTwo(), new AnnexThree(), new AnnexFour()};
 
+    private static Scanner input = new Scanner(System.in);
     private static AnnexCalculator annexCalculator;
     private static AbstractAnnex annex = getAnnex();
     private static double rbt12 = getRbt12();
     private static double salesValue = getSalesValue();
 
-    public static void main(String[] args) {
+    public static void calculateTax() {
         double totalvalue = 0;
         double totalAliquot = 0;
         for (Map.Entry<String, Double> taxDetails : buildTaxCalculator().entrySet()) {
@@ -25,10 +26,10 @@ public class UserPanel {
             totalAliquot += (taxDetails.getValue() / salesValue) * 100;
         }
 
-        System.out.printf("Valor total dos impostos: R$ %.2f%n", totalvalue);
+        System.out.printf("Valor total dos impostos: R$ %.2f%nAlíquota efetiva: %.2f", totalvalue, totalAliquot);
     }
 
-    public static Map<String, Double> buildTaxCalculator() {
+    private static Map<String, Double> buildTaxCalculator() {
         if (annex instanceof AnnexOne || annex instanceof AnnexTwo) {
             annexCalculator = new AnnexCalculator(new AnnexCalculator.TaxCalculator(annex, rbt12, salesValue,
                     checkIcmsSt(), checkMonophasicPisAndCofins()));
@@ -40,51 +41,55 @@ public class UserPanel {
 
 
     private static AbstractAnnex getAnnex() {
-        Scanner inputAnnex = new Scanner(System.in);
         System.out.print("Anexo: ");
-        return annexes[inputAnnex.nextInt() - 1];
+        return annexes[input.nextInt() - 1];
     }
 
+//    private static void printPanel() {
+//        System.out.println("""
+//                Selecione a atividade de acordo com os códigos fornecidos abaixo:
+//                1. Revenda de mercadorias (Anexo 1 - Comércio) - Selecione 1
+//                2. Venda de produção (Anexo 2 - Indústria) - Selecione 2
+//                3. Prestação de serviços (Anexo 3) - Selecione 3
+//                4. Prestação de serviços (Anexo 4) - Selecione 4
+//                5. Prestação de serviços (Anexo 5) - Selecione 5
+//                """);
+//    }
+
     private static double getRbt12() {
-        Scanner inputRbt = new Scanner(System.in);
         System.out.print("RBT12: ");
-        return inputRbt.nextDouble();
+        return input.nextDouble();
     }
 
     private static double getSalesValue() {
-        Scanner inputSales = new Scanner(System.in);
         System.out.print("Valor das vendas: ");
-        return inputSales.nextDouble();
+        return input.nextDouble();
     }
 
     public static double checkReplacementTaxation(String taxName) {
-        Scanner inputSt = new Scanner(System.in);
         System.out.print("Insira o valor sujeito a substituição de " + taxName + ": ");
-        return inputSt.nextDouble();
+        return input.nextDouble();
     }
 
     public static String checkIcmsSt() {
-        Scanner inputSt = new Scanner(System.in);
         System.out.print("Sua empresa vendeu produtos sujeitos à ICMS ST?(sim/não?) ");
-        if (inputSt.next().equalsIgnoreCase("sim")) {
+        if (input.next().equalsIgnoreCase("sim")) {
             return "ICMS";
         }
         return null;
     }
 
     public static String checkMonophasicPisAndCofins() {
-        Scanner inputSt = new Scanner(System.in);
         System.out.print("Sua empresa vendeu produtos sujeitos à tributação monofásoica de PIS e COFINS?(sim/não) ");
-        if (inputSt.next().equalsIgnoreCase("sim")) {
+        if (input.next().equalsIgnoreCase("sim")) {
             return "PIS COFINS";
         }
         return null;
     }
 
     public static String checkIssRetented() {
-        Scanner inputIss = new Scanner(System.in);
         System.out.print("Sua empresa prestou serviços sujeitos com retenção de ISS?(sim/não?) ");
-        if (inputIss.next().equalsIgnoreCase("sim")) {
+        if (input.next().equalsIgnoreCase("sim")) {
             return "ISS";
         }
         return null;
